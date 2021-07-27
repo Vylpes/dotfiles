@@ -73,14 +73,16 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch dmenu
 --    , ((modm,               xK_p     ), spawn "sh ~/.scripts/dmenu_fix")
-    , ((modm,               xK_p     ), spawn "dmenu_run")
+--    , ((modm,               xK_p     ), spawn "dmenu_run")
+    , ((modm,               xK_p     ), spawn "rofi -combi-modi window,drun,ssh -theme Arc-Dark -font 'hack 18' -show combi")
+    , ((modm .|. shiftMask, xK_m     ), spawn "rofi -show emoji -modi emoji -theme Arc-Dark -font 'hack 18'")
 
     -- launch firefox
     , ((modm .|. shiftMask, xK_b     ), spawn "firefox")
 
     -- launch flameshot
-    , ((modm .|. shiftMask, xK_F3   ), spawn "flameshot full -c -p ~/Pictures/captures")
-    , ((modm .|. shiftMask, xK_F4   ), spawn "flameshot gui -p ~/Pictures/captures")
+    , ((modm .|. shiftMask, xK_s    ), spawn "flameshot full -c -p ~/captures")
+    , ((modm,               xK_s   ), spawn "flameshot gui -p ~/captures")
 
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
