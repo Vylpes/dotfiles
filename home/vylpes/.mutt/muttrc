@@ -1,0 +1,20 @@
+set from = "ADDRESS"
+set realname = "NAME"
+
+set imap_user = "ADDRESS"
+set imap_pass = "PASSWORD"
+
+set smtp_url = "smtp://$imap_user@mail.URL:587"
+set smtp_pass = $imap_pass
+
+set folder = "imap://mail.URL"
+set spoolfile = "+Inbox"
+set record = "+Sent"
+set postponed = "+Drafts"
+set trash = "+Trash"
+
+set move = no
+
+mailboxes "=Inbox =Sent =Drafts =Trash =Ongoing"
+
+set editor = vim
