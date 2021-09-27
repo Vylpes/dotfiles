@@ -269,6 +269,7 @@ myStartupHook = do
     spawnOnce "nitrogen --restore &"
     spawnOnce "picom &"
     spawnOnce "unclutter &"
+    spawnOnce "dunst &"
     spawnOnce "setxkbmap us"
 
 ------------------------------------------------------------------------

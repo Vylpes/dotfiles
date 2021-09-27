@@ -14,8 +14,10 @@ This is a list of the packages I use
 - cmatrix
 - cups
 - discord
-- dmenu
+- doas
 - dolphin-emu
+- dunst
+- flameshot
 - gimp
 - lightdm
 - lightdm-webkit2-greeter
@@ -25,11 +27,14 @@ This is a list of the packages I use
 - npm
 - nvidia
 - openssh
+- pavucontrol
 - picom
+- powerlevel10k
 - pulseaudio
 - qemu
 - retroarch
-- sudo
+- rofi
+- todoist
 - vim
 - x11
 - xmonad
