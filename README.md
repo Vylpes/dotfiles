@@ -34,6 +34,7 @@ This is a list of the packages I use
 - qemu
 - retroarch
 - rofi
+- rofi-emoji
 - todoist
 - vim
 - x11
