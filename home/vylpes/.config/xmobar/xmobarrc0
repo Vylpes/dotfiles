@@ -1,11 +1,13 @@
-Config { font = "xft:hack:pixelsize=12:antialias=true:hinting=true"
-       , additionalFonts = []
+Config { font = "xft:hack:pixelsize=20:antialias=true:hinting=true"
+       , additionalFonts = [ "xft:Font Awesome 6 Free Solid:pixelsize=20"
+                           , "xft:Font Awesome 6 Brands:pixelsize=20"
+                           ]
        , borderColor = "black"
        , border = TopB
        , bgColor = "black"
        , fgColor = "grey"
        , alpha = 255
-       , position = Static { xpos = 0, ypos = 0, width = 1920, height = 20 }
+       , position = Static { xpos = 0, ypos = 0, width = 2880, height = 30 }
        , textOffset = -1
        , iconOffset = -1
        , lowerOnStart = True
@@ -15,17 +17,17 @@ Config { font = "xft:hack:pixelsize=12:antialias=true:hinting=true"
        , iconRoot = "/home/vylpes/.xmonad/xpm"
        , allDesktops = False
        , overrideRedirect = True
-       , commands = [ Run Network "enp24s0" ["-t", "rx <rx>kb tx <tx>kb"] 10
-                    , Run Cpu ["-t", "cpu <total>%", "-L","3","-H","50",
+       , commands = [ Run Network "enp24s0" ["-t", "<fn=1></fn><rx>kb <fn=1></fn><tx>kb"] 10
+                    , Run Cpu ["-t", "<total>%", "-L","3","-H","50",
                                "--normal","green","--high","red"] 10
-                    , Run Memory ["-t","mem <usedratio>%"] 10
-                    , Run Com "uname" ["-s","-r"] "" 36000
+                    , Run Memory ["-t","<usedratio>%"] 10
+                    , Run Com "uname" ["-r"] "" 36000
                     , Run Date "%a %_d %b %Y %H:%M" "date" 10
-                    , Run DiskU [("/", "ssd <free> free"),("/home", "| hdd <free> free")] [] 10
+                    , Run DiskU [("/", "<free>"),("/home", "| hdd <free>")] [] 10
                     , Run UnsafeStdinReader
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = "%cpu% | %memory% | %enp24s0% | %disku% }\
-                    \{ <fc=#ee9a00>%date%</fc> | %uname% | %UnsafeStdinReader%"
+       , template = "<fn=1></fn> %cpu% | <fn=1></fn> %memory% | %enp24s0% | <fn=1></fn> %disku% }\
+                    \{ <fc=#ee9a00>%date%</fc> | <fn=2></fn> %uname% | %UnsafeStdinReader%"
        }

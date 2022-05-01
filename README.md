@@ -31,13 +31,13 @@ This is a list of the packages I use
 - picom
 - powerlevel10k
 - pulseaudio
-- qemu
-- retroarch
 - rofi
 - rofi-emoji
-- todoist
+- ttf-font-awesome
+- ttf-hack
 - vim
 - x11
 - xmonad
 - xmobar
+- yarn
 - zsh
