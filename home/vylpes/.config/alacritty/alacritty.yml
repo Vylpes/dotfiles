@@ -2,6 +2,10 @@ env:
     TERM: xterm-256color
 
 window:
+    dimensions:
+        columns: 133
+        lines: 40
+
     padding:
         x: 6
         y: 6
@@ -11,6 +15,8 @@ window:
     class:
        instance: Alacritty
        general: Alacritty
+    
+    opacity: 1
 
 scrolling:
     history: 5000
@@ -39,8 +45,6 @@ font:
         y: 1
 
 draw_bold_text_with_bright_colors: true
-
-background_opacity: 0.75
 
 key_bindings:
     - { key: V, mods: Control|Shift, action: Paste }
