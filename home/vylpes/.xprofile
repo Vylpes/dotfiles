@@ -1,0 +1,7 @@
+xrandr --output DP-4 --scale 0.75x0.75
+
+dwmblocks &
+dunst &
+nitrogen --restore &
+picom &
+variety &
