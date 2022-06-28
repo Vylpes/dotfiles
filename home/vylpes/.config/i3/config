@@ -34,9 +34,9 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-exec_always picom
-exec_always nitrogen --restore
-exec_always dunst
+exec_always --no-startup-id picom
+exec_always --no-startup-id nitrogen --restore
+exec_always --no-startup-id dunst
 exec --no-startup-id polybar -r
 
 # Use pactl to adjust volume in PulseAudio.
@@ -50,9 +50,9 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 floating_modifier $mod
 
 # Custom keybinds
-bindsym $mod+s exec flameshot gui -p ~/Pictures/captures --clipboard
-bindsym $mod+f exec firefox
-bindsym $mod+Shift+z exec dm-tool lock
+bindsym $mod+s exec --no-startup-id flameshot gui -p ~/Pictures/captures --clipboard
+bindsym $mod+f exec --no-startup-id firefox
+bindsym $mod+Shift+z exec --no-startup-id i3lock 
 # =====
 
 # start a terminal
@@ -160,8 +160,8 @@ bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
 # keyboard layouts
-bindsym $mod+Shift+F1 exec setxkbmap -layout us && $refresh_i3status
-bindsym $mod+Shift+F2 exec setxkbmap -layout gb && $refresh_i3status
+bindsym $mod+Shift+F1 exec --no-startup-id setxkbmap -layout us && $refresh_i3status
+bindsym $mod+Shift+F2 exec --no-startup-id setxkbmap -layout gb && $refresh_i3status
 
 # reload the configuration file
 bindsym $mod+Mod1+r reload
