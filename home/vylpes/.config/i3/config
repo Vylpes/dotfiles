@@ -37,9 +37,10 @@ exec --no-startup-id nm-applet
 exec_always picom
 exec_always nitrogen --restore
 exec_always dunst
+exec --no-startup-id polybar -r
 
 # Use pactl to adjust volume in PulseAudio.
-set $refresh_i3status killall -SIGUSR1 i3status
+set $refresh_i3status killall -SIGUSR1 polybar
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
@@ -158,6 +159,10 @@ bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
+# keyboard layouts
+bindsym $mod+Shift+F1 exec setxkbmap -layout us && $refresh_i3status
+bindsym $mod+Shift+F2 exec setxkbmap -layout gb && $refresh_i3status
+
 # reload the configuration file
 bindsym $mod+Mod1+r reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
@@ -194,10 +199,6 @@ bindsym $mod+r mode "resizer
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-bar {
-    position top
-        status_command i3status
-}
 
 # Gaps
 gaps inner 10

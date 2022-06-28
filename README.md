@@ -19,6 +19,7 @@ This is a list of the packages I use
 - dunst
 - flameshot
 - gimp
+- i3
 - lightdm
 - lightdm-webkit2-greeter
 - networkmanager
@@ -26,9 +27,11 @@ This is a list of the packages I use
 - nodejs
 - npm
 - nvidia
+- nvm
 - openssh
 - pavucontrol
 - picom
+- polybar
 - powerlevel10k
 - pulseaudio
 - rofi
@@ -37,7 +40,5 @@ This is a list of the packages I use
 - ttf-hack
 - vim
 - x11
-- xmonad
-- xmobar
 - yarn
 - zsh
