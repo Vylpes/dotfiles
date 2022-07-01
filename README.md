@@ -20,6 +20,8 @@ This is a list of the packages I use
 - flameshot
 - gimp
 - i3
+- i3lock
+- i3lock-fancy
 - lightdm
 - lightdm-webkit2-greeter
 - networkmanager

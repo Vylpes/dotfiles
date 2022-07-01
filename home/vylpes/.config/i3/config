@@ -52,7 +52,7 @@ floating_modifier $mod
 # Custom keybinds
 bindsym $mod+s exec --no-startup-id flameshot gui -p ~/Pictures/captures --clipboard
 bindsym $mod+f exec --no-startup-id firefox
-bindsym $mod+Shift+z exec --no-startup-id i3lock 
+bindsym $mod+Shift+z exec --no-startup-id i3lock-fancy -g -t "System Locked" -f Hack-Regular
 # =====
 
 # start a terminal
