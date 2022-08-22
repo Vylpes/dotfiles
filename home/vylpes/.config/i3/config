@@ -73,6 +73,9 @@ bindsym $mod+Shift+o exec --no-startup-id "passmenu-otp -combi-modi window,drun,
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
+bindsym $mod+Shift+F11 exec --no-startup-id "pactl set-default-sink 3 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
+bindsym $mod+Shift+F12 exec --no-startup-id "pactl set-default-sink 76 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
+
 # change focus
 bindsym $mod+h focus left
 bindsym $mod+j focus down
