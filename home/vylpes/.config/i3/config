@@ -37,7 +37,9 @@ exec --no-startup-id nm-applet
 exec_always --no-startup-id picom
 exec_always --no-startup-id nitrogen --restore
 exec_always --no-startup-id dunst
+exec_always --no-startup-id xborders --disable-version-warning --border-red 79 --border-green 190 --border-blue 217 --border-radius 15
 exec --no-startup-id polybar -r
+exec --no-startup-id "sh /home/vylpes/.screenlayout/default.sh"
 
 # Use pactl to adjust volume in PulseAudio.
 # Add "&& $refresh_i3status" if needed
@@ -215,5 +217,5 @@ gaps right 10
 gaps bottom 10
 gaps left 10
 
-default_border pixel
+default_border pixel 1
 client.focused #555555 #555555 #ffffff #2e9ef4     #63C5DA
