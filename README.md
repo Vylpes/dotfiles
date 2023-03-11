@@ -22,6 +22,8 @@ This is a list of the packages I use
 - i3
 - i3lock
 - i3lock-fancy
+- keepassxc
+- keepmenu
 - lightdm
 - lightdm-webkit2-greeter
 - networkmanager

@@ -68,15 +68,14 @@ bindsym $mod+Shift+c kill
 # start dmenu (a program launcher)
 bindsym $mod+p exec --no-startup-id "rofi -combi-modi window,drun,ssh -theme Arc-Dark -font 'hack 18' -show combi"
 
-bindsym $mod+o exec --no-startup-id "passmenu -combi-modi window,drun,ssh -theme Arc-Dark -font 'hack 18' -show combi"
-bindsym $mod+Shift+o exec --no-startup-id "passmenu-otp -combi-modi window,drun,ssh -theme Arc-Dark -font 'hack 18' -show combi"
+bindsym $mod+o exec --no-startup-id "keepmenu"
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
-bindsym $mod+Shift+F11 exec --no-startup-id "pactl set-default-sink 2 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
+bindsym $mod+Shift+F11 exec --no-startup-id "pactl set-default-sink 0 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
 bindsym $mod+Shift+F12 exec --no-startup-id "pactl set-default-sink 1 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
 
 # change focus
