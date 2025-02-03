@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SINK=$(pactl get-default-sink)
 
@@ -9,3 +9,4 @@ elif [ $SINK = "alsa_output.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.ana
 else
 	echo "-"
 fi
+

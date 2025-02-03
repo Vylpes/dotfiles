@@ -14,7 +14,6 @@ This is a list of the packages I use
 - cmatrix
 - cups
 - discord
-- doas
 - dolphin-emu
 - dunst
 - flameshot
