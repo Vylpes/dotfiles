@@ -48,7 +48,7 @@ call plug#begin("~/.vim/plugged")
     Plug 'jose-elias-alvarez/null-ls.nvim'
     Plug 'MunifTanjim/prettier.nvim'
     Plug 'github/copilot.vim'
-    Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
+    Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'main' }
 call plug#end()
 
 lua << EOF
