@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ $(cat /etc/pam.d/login | grep pam_gnome_keyring.so | wc -l) = "0" ]; then
+    sudo cp $HOME/.config/yadm/files/login /etc/pam.d/login
+else
+    exit 0
+fi

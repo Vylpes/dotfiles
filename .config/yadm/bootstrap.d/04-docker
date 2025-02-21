@@ -1,0 +1,9 @@
+#!/bin/bash
+if pacman -Q docker; then
+    exit 0
+else
+    sudo pacman -S --noconfirm docker
+
+    sudo usermod -aG docker vylpes
+    sudo systemctl enable --now docker
+fi

@@ -1,0 +1,11 @@
+#!/bin/bash
+if pacman -Q paru; then
+    exit 0
+fi
+
+sudo pacman -S --needed base-devel
+git clone https://aur.archlinux.org/paru.git /tmp/paru
+cd /tmp/paru
+makepkg -si
+cd
+rm -rf /tmp/paru

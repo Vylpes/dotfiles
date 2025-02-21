@@ -1,0 +1,1 @@
+yadm remote set-url origin "ssh://git@ssh.git.vylpes.xyz:222/Vylpes/dotfiles.git"

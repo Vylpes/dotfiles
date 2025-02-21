@@ -1,0 +1,8 @@
+#!/bin/bash
+while read -r line; do
+    if paru -Q $line; then
+        echo "$line installed"
+    else
+        paru -S --noconfirm $line
+    fi
+done <$HOME/.config/yadm/files/packages.txt

@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $SHELL = '/bin/zsh' ]; then
+    exit 0
+else
+    chsh --shell /bin/zsh
+
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+fi

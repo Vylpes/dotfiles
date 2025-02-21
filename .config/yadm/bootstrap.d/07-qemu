@@ -1,0 +1,9 @@
+#!/bin/bash
+if pacman -Q virt-manager; then
+    exit 0
+else
+    sudo pacman -S --noconfirm virt-manager
+
+    sudo systemctl enable --now libvirtd.socket
+    sudo usermod -aG libvirt vylpes
+fi
