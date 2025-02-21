@@ -23,6 +23,7 @@ pulseaudio-control
 picom
 polybar
 ranger
+rsync
 sxiv
 rofi
 tldr
