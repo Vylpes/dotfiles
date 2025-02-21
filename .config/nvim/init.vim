@@ -47,28 +47,7 @@ call plug#begin("~/.vim/plugged")
     Plug 'neovim/nvim-lspconfig'
     Plug 'jose-elias-alvarez/null-ls.nvim'
     Plug 'MunifTanjim/prettier.nvim'
-    Plug 'github/copilot.vim'
-    Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'main' }
 call plug#end()
-
-lua << EOF
-require("CopilotChat").setup {
-  debug = false,
-
-  question_header = '## User ',
-  answer_header = '## Copilot ',
-  error_header = '## Error ',
-  separator = '---',
-
-  selection = function(source)
-    return select.visual(source) or select.line(source)
-  end,
-
-  window = {
-      layout = 'float',
-  },
-}
-EOF
 
 if (has("termguicolors"))
     set termguicolors
@@ -120,21 +99,3 @@ nnoremap <leader>ff :FZF<CR>
 nnoremap mm :nohl<CR>
 nnoremap ml :%s/\r//g<CR>
 
-nnoremap <leader>yb :!yarn build<CR>
-nnoremap <leader>yi :!yarn install<CR>
-nnoremap <leader>ys :!yarn start<CR>
-nnoremap <leader>yt :!yarn test<CR>
-
-nnoremap <leader>dr :!dotnet run<CR>
-
-nnoremap <leader>p <Plug>(prettier-format)<CR>
-
-nnoremap <C-p> :CopilotChatToggle<CR>
-nnoremap <leader>ps :CopilotChatStop<CR>
-nnoremap <leader>pr :CopilotChatReset<CR>
-vnoremap <leader>pe :CopilotChatExplain<CR>
-vnoremap <leader>pr :CopilotChatReview<CR>
-vnoremap <leader>pf :CopilotChatFix<CR>
-vnoremap <leader>po :CopilotChatOptimize<CR>
-vnoremap <leader>pd :CopilotChatDocs<CR>
-vnoremap <leader>pt :CopilotChatTests<CR>
