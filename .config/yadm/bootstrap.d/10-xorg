@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo cp $HOME/.config/yadm/files/40-libinput.conf /usr/share/X11/xorg.conf.d/
