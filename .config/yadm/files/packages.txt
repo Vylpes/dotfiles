@@ -9,6 +9,7 @@ flameshot
 gnome-keyring
 i3-wm
 i3lock
+i3lock-fancy
 keepassxc
 keepmenu
 neovim
