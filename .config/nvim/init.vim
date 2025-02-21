@@ -52,9 +52,6 @@ call plug#begin("~/.vim/plugged")
 call plug#end()
 
 lua << EOF
-local prompts = require('CopilotChat.prompts')
-local select = require('CopilotChat.select')
-
 require("CopilotChat").setup {
   debug = false,
 
