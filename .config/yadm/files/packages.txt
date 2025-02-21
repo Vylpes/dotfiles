@@ -21,6 +21,7 @@ pulseaudio-control
 picom
 polybar
 ranger
+sxiv
 rofi
 tldr
 ttf-font-awesome
