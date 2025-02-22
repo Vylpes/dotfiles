@@ -2,7 +2,7 @@
 if pacman -Q docker; then
     exit 0
 else
-    sudo pacman -S --noconfirm docker
+    sudo pacman -S --noconfirm docker docker-compose
 
     sudo usermod -aG docker vylpes
     sudo systemctl enable --now docker
