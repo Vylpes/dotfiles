@@ -24,6 +24,7 @@ picom
 polybar
 ranger
 rsync
+steam
 sxiv
 rofi
 tldr
