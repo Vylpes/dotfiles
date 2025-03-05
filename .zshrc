@@ -12,13 +12,20 @@ source ~/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 alias lss="ls -lah"
+
 alias gco="git checkout"
 alias gcm="git commit -m"
 alias gss="git status -s"
 alias gaa="git add -A"
+alias gf="git fetch --prune"
+alias gd="git pull"
+alias gu="git push"
+
 alias ya="yadm add"
 alias ycm="yadm commit -m"
-alias yp="yadm pull"
+alias yf="yadm fetch"
+alias yd="yadm pull"
+alias yu="yadm push"
 alias yss="yadm status -s"
 
 export EDITOR="nvim"
