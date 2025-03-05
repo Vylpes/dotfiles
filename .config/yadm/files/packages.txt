@@ -12,6 +12,7 @@ i3lock
 i3lock-fancy
 keepassxc
 keepmenu
+less
 mpv
 neovim
 nextcloud-client
@@ -24,7 +25,6 @@ picom
 polybar
 ranger
 rsync
-steam
 sxiv
 rofi
 tldr
