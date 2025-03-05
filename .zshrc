@@ -15,7 +15,11 @@ alias lss="ls -lah"
 alias gco="git checkout"
 alias gcm="git commit -m"
 alias gss="git status -s"
-alias gaa="git commit -A"
+alias gaa="git add -A"
+alias ya="yadm add"
+alias ycm="yadm commit -m"
+alias yp="yadm pull"
+alias yss="yadm status -s"
 
 export EDITOR="nvim"
 
