@@ -47,6 +47,7 @@ call plug#begin("~/.vim/plugged")
     Plug 'neovim/nvim-lspconfig'
     Plug 'jose-elias-alvarez/null-ls.nvim'
     Plug 'MunifTanjim/prettier.nvim'
+    Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
 if (has("termguicolors"))
