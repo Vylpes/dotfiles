@@ -30,6 +30,7 @@ rofi
 tldr
 ttf-font-awesome
 ttf-hack
+xborder-git
 xclip
 xorg-xinit
 yt-dlp
