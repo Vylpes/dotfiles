@@ -4,9 +4,11 @@ autorandr
 cups
 discord
 dunst
+fastfetch
 firefox
 flameshot
 gnome-keyring
+hyfetch
 i3-wm
 i3lock
 i3lock-fancy
