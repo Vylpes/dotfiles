@@ -11,6 +11,12 @@ source ~/powerlevel10k/powerlevel10k.zsh-theme
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# History
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+
+# Command Alias
 alias lss="ls -lah"
 alias yt-dlp-mp4="yt-dlp --no-config --format 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]'"
 
@@ -29,6 +35,7 @@ alias yd="yadm pull"
 alias yu="yadm push"
 alias yss="yadm status -s"
 
+# Exports
 export EDITOR="nvim"
 
 export NVM_DIR="$HOME/.nvm"
@@ -37,3 +44,4 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH="$HOME/.dotnet/tools:$PATH"
 export PATH="$HOME/.yarn/bin:$PATH"
+
