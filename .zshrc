@@ -19,6 +19,7 @@ SAVEHIST=10000
 # Command Alias
 alias lss="ls -lah"
 alias yt-dlp-mp4="yt-dlp --no-config --format 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]'"
+alias t="todo.sh"
 
 alias gco="git checkout"
 alias gcm="git commit -m"
