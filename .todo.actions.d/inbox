@@ -1,0 +1,79 @@
+#!/bin/bash
+
+## Inbox todos storage file ##
+export INBOX_PATH="$TODO_DIR"
+export INBOX_FILE="inbox.txt"
+export INBOX_FULL_PATH="$INBOX_PATH/$INBOX_FILE"
+#export INBOX_THRESHOLD="14d"
+
+## Display usage information ##
+function usage {
+	cat <<-END
+	
+		inbox - Create and manage your inbox tasks
+			
+		Usage:
+		    inbox ls
+		        List todos in $INBOX_FILE
+				
+		    inbox move ITEM#
+		        Move specified todo out of $INBOX_FILE
+
+            inbox add DESCRIPTION
+                Add new todo to $INBOX_FILE
+
+		END
+	
+	exit 0
+}
+
+## Lists todos in stale.txt ##
+function listInboxTodos {
+	$TODO_FULL_SH listfile "$INBOX_FULL_PATH"
+	
+	exit 0
+}
+
+## Moves todo from inbox.txt to todo.txt ##
+function moveTodo {
+	itemnum="$1"
+	getTodo "$itemnum" "$INBOX_FULL_PATH"
+	cleanTodo=$(echo "$todo" | sed -E 's/x [0-9]{4}-[0-9]{2}-[0-9]{2} //')
+	$TODO_FULL_SH add "$cleanTodo"
+	if [ $TODOTXT_PRESERVE_LINE_NUMBERS = 0 ]; then
+                # delete line (changes line numbers)
+                sed -i.bak -e "${itemnum}s/^.*//" -e '/./!d' "$INBOX_FULL_PATH"
+            else
+                # leave blank line behind (preserves line numbers)
+                sed -i.bak -e "${itemnum}s/^.*//" "$INBOX_FULL_PATH"
+fi
+	exit 0
+}
+
+## Add todo to inbox.txt ##
+function addTodo {
+    description="$1"
+    $TODO_FULL_SH addto inbox.txt "$description"
+}
+
+
+action=$1
+shift
+
+if [ "$1" = "usage" ]; then
+	usage
+fi
+
+if [ "$1" = "ls" ]; then
+ 	listInboxTodos
+elif [ "$1" = "move" ] && [[ "$2" =~ [0-9]+ ]]; then
+	moveTodo "$2"
+elif [ "$1" = "add" ] && [[ -n "$2" ]]; then
+	addTodo "$2"
+else
+	cat <<-EndShortUsage
+	$TODO_SH inbox ls | List inbox tasks
+	$TODO_SH inbox move ITEM# | Move item from $INBOX_FILE to todo.txt
+	$TODO_SH inbox add DESCRIPTION | Add todo to $INBOX_FILE
+	EndShortUsage
+fi
