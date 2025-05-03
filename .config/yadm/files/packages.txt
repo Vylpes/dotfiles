@@ -21,6 +21,7 @@ nitrogen
 noto-fonts-emoji
 pavucontrol
 playerctl
+plexamp-appimage
 pulseaudio-control
 picom
 polybar
