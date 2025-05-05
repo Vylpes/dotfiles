@@ -1,2 +1,5 @@
 #!/bin/bash
-sudo cp $HOME/.config/yadm/files/40-libinput.conf /usr/share/X11/xorg.conf.d/
+sudo cp $HOME/.config/yadm/files/xorg/usr/40-libinput.conf /usr/share/X11/xorg.conf.d/
+
+sudo cp $HOME/.config/yadm/files/xorg/etc/10-extensions.conf /etc/X11/xorg.conf.d/
+sudo cp $HOME/.config/yadm/files/xorg/etc/10-serverflags.conf /etc/X11/xorg.conf.d/
