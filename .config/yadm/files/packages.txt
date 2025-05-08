@@ -8,6 +8,7 @@ fastfetch
 firefox
 flameshot
 gnome-keyring
+htop
 hyfetch
 i3-wm
 i3lock
