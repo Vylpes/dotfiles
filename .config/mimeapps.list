@@ -1,0 +1,10 @@
+[Added Associations]
+
+[Removed Associations]
+
+[Default Applications]
+application/pdf=firefox.desktop
+image/jpeg=sxiv.desktop
+image/png=sxiv.desktop
+text/plain=nvim.desktop
+video/mp4=mpv.desktop
