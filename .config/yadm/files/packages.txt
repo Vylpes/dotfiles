@@ -15,6 +15,7 @@ i3lock
 keepassxc
 keepmenu
 less
+lf
 mpv
 neovim
 nextcloud-client
@@ -26,7 +27,6 @@ plexamp-appimage
 pulseaudio-control
 picom
 polybar
-ranger
 rsync
 sxiv
 rofi
