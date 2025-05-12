@@ -3,3 +3,6 @@ mkdir -p $HOME/Documents
 mkdir -p $HOME/Downloads
 mkdir -p $HOME/Desktop
 mkdir -p $HOME/Pictures/captures
+
+sudo mkdir -p /mnt/usb0
+sudo mkdir -p /mnt/nfs0
