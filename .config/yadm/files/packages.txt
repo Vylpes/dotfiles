@@ -19,6 +19,7 @@ lf
 mpv
 neovim
 nextcloud-client
+nfs-utils
 nitrogen
 noto-fonts-emoji
 pavucontrol
