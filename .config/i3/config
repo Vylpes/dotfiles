@@ -67,7 +67,7 @@ bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
 floating_modifier $mod
 
 # Custom keybinds
-bindsym $mod+s exec --no-startup-id flameshot gui -p ~/Pictures/captures --clipboard
+bindsym $mod+s exec --no-startup-id flameshot gui --path ~/Pictures/captures --raw | xclip -selection clipboard -target image/png
 bindsym $mod+f exec --no-startup-id firefox
 bindsym $mod+u exec --no-startup-id autorandr -c
 bindsym $mod+Shift+f exec --no-startup-id firefox --private-window
