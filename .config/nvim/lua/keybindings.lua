@@ -45,6 +45,6 @@ map("n", "<leader>4", [[<cmd>lua require("harpoon.ui").nav_file(4)<CR>]], opts)
 map("n", "<A-[>", [[<cmd>lua require("harpoon.ui").nav_prev()<CR>]], opts)
 map("n", "<A-]>", [[<cmd>lua require("harpoon.ui").nav_next()<CR>]], opts)
 
-map("n", "<leader>ff", ":FZF<CR>", opts)
+map("n", "<leader>ff", require("fzf-lua").files, opts)
 
 map("n", "mm", ":nohl<CR>", opts)

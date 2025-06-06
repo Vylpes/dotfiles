@@ -25,8 +25,7 @@ return require("packer").startup {
     use {'neoclide/coc.nvim', branch = 'release'}
     use 'nvim-lua/plenary.nvim'
     use 'ThePrimeagen/harpoon'
-    use 'junegunn/fzf'
-    use 'junegunn/fzf.vim'
+    use 'ibhagwan/fzf-lua'
     use 'neovim/nvim-lspconfig'
     use 'jose-elias-alvarez/null-ls.nvim'
     use 'MunifTanjim/prettier.nvim'
