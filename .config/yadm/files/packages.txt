@@ -10,6 +10,7 @@ flameshot
 gnome-keyring
 htop
 hyfetch
+i3-battery-popup
 i3-wm
 i3lock
 keepassxc
