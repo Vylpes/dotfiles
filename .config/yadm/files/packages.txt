@@ -33,7 +33,6 @@ rsync
 sxiv
 rofi
 tldr
-todotxt
 ttf-font-awesome
 ttf-hack
 xborder-git
