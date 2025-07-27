@@ -34,8 +34,8 @@ rsync
 sxiv
 rofi
 tldr
-ttf-font-awesome
 ttf-hack
+woff2-font-awesome
 xborder-git
 xclip
 xorg-xinit
