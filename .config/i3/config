@@ -74,6 +74,7 @@ bindsym $mod+u exec --no-startup-id autorandr -c
 bindsym $mod+Shift+f exec --no-startup-id firefox --private-window
 bindsym $mod+Shift+z exec --no-startup-id i3lock --color 000000
 bindsym $mod+F12 exec --no-startup-id dunstctl history-pop
+bindsym $mod+F1 exec --no-startup-id "sh /home/vylpes/scripts/system/toggle-keyboard.sh"
 # =====
 
 # start a terminal
@@ -186,10 +187,6 @@ bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
-
-# keyboard layouts
-bindsym $mod+F1 exec --no-startup-id setxkbmap -layout us 
-bindsym $mod+F2 exec --no-startup-id setxkbmap -layout gb 
 
 # reload the configuration file
 bindsym $mod+Mod1+r reload
