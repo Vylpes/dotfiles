@@ -92,9 +92,6 @@ bindsym $mod+o exec --no-startup-id "keepmenu"
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
-bindsym $mod+Shift+F11 exec --no-startup-id "pactl set-default-sink 0 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
-bindsym $mod+Shift+F12 exec --no-startup-id "pactl set-default-sink 1 && sh ~/.scripts/audio/get-sink-name.sh > ~/.cache/scripts/get-sink-name.txt"
-
 # change focus
 bindsym $mod+h focus left
 bindsym $mod+j focus down
@@ -191,8 +188,8 @@ bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
 # keyboard layouts
-bindsym $mod+Shift+F1 exec --no-startup-id setxkbmap -layout us 
-bindsym $mod+Shift+F2 exec --no-startup-id setxkbmap -layout gb 
+bindsym $mod+F1 exec --no-startup-id setxkbmap -layout us 
+bindsym $mod+F2 exec --no-startup-id setxkbmap -layout gb 
 
 # reload the configuration file
 bindsym $mod+Mod1+r reload
