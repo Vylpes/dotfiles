@@ -30,7 +30,6 @@ pulseaudio-control
 picom
 polybar
 ranger
-redshift
 rsync
 sxiv
 rofi
