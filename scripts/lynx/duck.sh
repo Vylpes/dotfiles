@@ -1,0 +1,1 @@
+$HOME/scripts/lynx/lynx.sh "https://lite.duckduckgo.com/lite?kd=-1&kp=-1&q=$*"
