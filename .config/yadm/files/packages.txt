@@ -3,6 +3,7 @@ alacritty
 arandr
 autorandr
 cups
+dex
 discord
 dunst
 fastfetch
