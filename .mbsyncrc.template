@@ -1,0 +1,25 @@
+
+IMAPStore remote
+Host 127.0.0.1
+Port 1143
+User <EMAIL ADDRESS>
+Pass "<PASSWORD>"
+AuthMechs LOGIN
+TLSType None
+
+MaildirStore local
+Subfolders Verbatim
+Path /home/vylpes/Mail/
+Inbox /home/vylpes/Mail/Inbox
+
+Channel protonmail
+Expunge Both
+Far :remote:
+Near :local:
+Patterns * !Labels* !"All Mail"
+Create Both
+SyncState *
+MaxMessages 0
+ExpireUnread no
+# End profile
+

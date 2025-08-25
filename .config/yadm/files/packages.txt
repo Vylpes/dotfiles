@@ -22,7 +22,6 @@ keepmenu
 less
 lynx
 mpv
-mutt-wizard
 neomutt
 neovim
 nextcloud-client
@@ -40,6 +39,7 @@ picom
 polybar
 ranger
 rsync
+msmtp
 sxiv
 rofi
 tldr

@@ -1,0 +1,5 @@
+# vim: filetype=neomuttrc
+
+set real_name = ""
+set from = ""
+set hostname = ""
