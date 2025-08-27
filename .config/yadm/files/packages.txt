@@ -25,7 +25,6 @@ lynx
 mpv
 neomutt
 neovim
-nextcloud-client
 nfs-utils
 nitrogen
 notmuch
