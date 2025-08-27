@@ -1,5 +1,5 @@
 [Desktop Entry]
 Type=Application
 Name=KDE Connect
-Exec="kdeconnectd-indicator"
+Exec="kdeconnect-indicator"
 X-GNOME-Autostart-enabled=true
