@@ -48,5 +48,7 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$HOME/.dotnet/tools:$PATH"
 export PATH="$HOME/.yarn/bin:$PATH"
 
+export GPG_TTY=$TTY
+
 # Emacs Mode
 bindkey -e
