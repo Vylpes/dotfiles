@@ -31,6 +31,7 @@ notmuch
 noto-fonts-emoji
 pam-gnupg
 pavucontrol
+pcmanfm
 playerctl
 plexamp-appimage
 protonmail-bridge
