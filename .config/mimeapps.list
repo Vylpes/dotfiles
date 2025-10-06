@@ -3,6 +3,7 @@
 [Removed Associations]
 
 [Default Applications]
+inode/directory=pcmanfm.desktop
 application/pdf=firefox.desktop
 image/jpeg=sxiv.desktop
 image/png=sxiv.desktop
