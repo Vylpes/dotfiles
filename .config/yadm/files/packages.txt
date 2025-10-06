@@ -9,6 +9,7 @@ fastfetch
 firefox
 flameshot
 fzf
+gearlever
 gnome-keyring
 htop
 hyfetch
