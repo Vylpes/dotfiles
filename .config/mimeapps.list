@@ -5,6 +5,8 @@
 [Default Applications]
 inode/directory=pcmanfm.desktop
 application/pdf=firefox.desktop
+audio/flac=mpv.desktop
+audio/mp3=mpv.desktop
 image/jpeg=sxiv.desktop
 image/png=sxiv.desktop
 text/plain=nvim.desktop
