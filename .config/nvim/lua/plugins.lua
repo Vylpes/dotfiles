@@ -30,6 +30,7 @@ return require("packer").startup {
     use 'jose-elias-alvarez/null-ls.nvim'
     use 'MunifTanjim/prettier.nvim'
     use 'OmniSharp/omnisharp-vim'
+    use 'folke/which-key.nvim'
 
     -- Install and compile Plugins
     if packer_bootstrap then

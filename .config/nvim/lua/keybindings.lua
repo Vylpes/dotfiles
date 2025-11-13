@@ -69,3 +69,4 @@ map("n", "<leader>li", [[<Cmd>lua require"fzf-lua".lsp_implementations()<CR>]], 
 
 -- General
 map("n", "mm", ":nohl<CR>", opts)
+map("n", "<leader>/", [[<Cmd>lua require("which-key").show({ global = true })<CR>]], opts)
