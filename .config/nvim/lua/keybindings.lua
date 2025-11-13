@@ -58,6 +58,14 @@ map("n", "<leader>gs", [[<Cmd>lua require"fzf-lua".git_status()<CR>]], opts)
 map("n", "<leader>gd", [[<Cmd>lua require"fzf-lua".git_diff()<CR>]], opts)
 map("n", "<leader>gb", [[<Cmd>lua require"fzf-lua".git_branches()<CR>]], opts)
 map("n", "<leader>gc", [[<Cmd>lua require"fzf-lua".git_commits()<CR>]], opts)
+map("n", "<leader>gt", [[<Cmd>lua require"fzf-lua".git_tags()<CR>]], opts)
+map("n", "<leader>gh", [[<Cmd>lua require"fzf-lua".git_stash()<CR>]], opts)
+
+-- FZF: LSP
+map("n", "<leader>lr", [[<Cmd>lua require"fzf-lua".lsp_references()<CR>]], opts)
+map("n", "<leader>ld", [[<Cmd>lua require"fzf-lua".lsp_definitions()<CR>]], opts)
+map("n", "<leader>lt", [[<Cmd>lua require"fzf-lua".lsp_typedefs()<CR>]], opts)
+map("n", "<leader>li", [[<Cmd>lua require"fzf-lua".lsp_implementations()<CR>]], opts)
 
 -- General
 map("n", "mm", ":nohl<CR>", opts)
