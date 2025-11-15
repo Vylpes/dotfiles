@@ -21,7 +21,6 @@ alias lss="ls -lah"
 alias yt-dlp-mp4="yt-dlp --no-config --format 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]'"
 alias t="todo.sh"
 alias r="ranger"
-alias lx="$HOME/scripts/lynx/duck.sh"
 
 alias gco="git checkout"
 alias gcm="git commit -m"
@@ -47,6 +46,7 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH="$HOME/.dotnet/tools:$PATH"
 export PATH="$HOME/.yarn/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 export GPG_TTY=$TTY
 
