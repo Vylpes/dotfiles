@@ -41,7 +41,6 @@ exec_always --no-startup-id xborders --disable-version-warning --border-red 79 -
 exec_always --no-startup-id autorandr -c
 exec --no-startup-id polybar -r
 exec --no-startup-id i3-battery-popup -n -D -L 20 -l 10
-exec --no-startup-id /home/vylpes/scripts/wallpaper/styli.sh && /home/vylpes/scripts/wallpaper/styli.sh -sa
 
 exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=ssh,secrets,pkcs11
 
