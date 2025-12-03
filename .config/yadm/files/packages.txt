@@ -44,6 +44,7 @@ sane-airscan
 sxiv
 rofi
 tldr
+todotxt
 ttf-hack
 typescript-language-server
 woff2-font-awesome
