@@ -1,6 +1,7 @@
 alacritty
 arandr
 autorandr
+betterlockscreen
 brother-dcp-l2665dw
 brscan4
 brscan-skey
@@ -18,7 +19,6 @@ htop
 hyfetch
 i3-battery-popup-git
 i3-wm
-i3lock
 isync
 kdeconnect
 keepassxc
