@@ -24,11 +24,12 @@ if [ ! -d "$CACHEDIR" ]; then
     mkdir -p "$CACHEDIR"
 fi
 
+DATE=$(date --utc +%Y-%m-%dT%H-%M-%S)
 WALLPAPER="$CACHEDIR/wallpaper.jpg"
 
 save_cmd() {
     cp "$WALLPAPER" "$HOME/Pictures/wallpaper.jpg"
-    cp "$WALLPAPER" "$HOME/Pictures/Wallpapers/$RANDOM.jpg"
+    cp "$WALLPAPER" "$HOME/Pictures/Wallpapers/$DATE.jpg"
 }
 
 get_monitor_resolution() {
