@@ -1,6 +1,9 @@
 alacritty
 arandr
 autorandr
+brother-dcp-l2665dw
+brscan4
+brscan-skey
 cups
 dex
 discord
@@ -36,6 +39,8 @@ picom
 polybar
 ranger
 rsync
+sane
+sane-airscan
 sxiv
 rofi
 tldr
