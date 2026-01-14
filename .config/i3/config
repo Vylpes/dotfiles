@@ -71,6 +71,7 @@ bindsym $mod+f exec --no-startup-id firefox
 bindsym $mod+u exec --no-startup-id autorandr -c
 bindsym $mod+Shift+f exec --no-startup-id firefox --private-window
 bindsym $mod+m exec --no-startup-id pcmanfm
+bindsym $mod+i exec --no-startup-id rofi -show emoji -theme Arc-Dark -font 'hack 18'
 bindsym $mod+Shift+z exec --no-startup-id betterlockscreen -l
 bindsym $mod+d exec --no-startup-id dunstctl history-pop
 bindsym $mod+q exec --no-startup-id "sh /home/vylpes/scripts/system/toggle-keyboard.sh"

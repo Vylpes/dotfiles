@@ -43,6 +43,7 @@ sane
 sane-airscan
 sxiv
 rofi
+rofi-emoji
 tldr
 todotxt
 ttf-hack
