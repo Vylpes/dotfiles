@@ -10,6 +10,7 @@ dex
 discord
 dunst
 fastfetch
+feh
 firefox
 flameshot
 fzf
@@ -27,7 +28,6 @@ less
 mpv
 neovim
 nfs-utils
-nitrogen
 noto-fonts-emoji
 pam-gnupg
 pavucontrol
