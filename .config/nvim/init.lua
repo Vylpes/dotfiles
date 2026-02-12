@@ -1,5 +1,6 @@
 require("configs")
 require("plugins")
 require("plugins.lsp")
+require("plugins.whichkey")
 require("keybindings")
 require("functions")
