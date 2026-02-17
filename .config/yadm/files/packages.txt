@@ -2,6 +2,7 @@ alacritty
 arandr
 autorandr
 betterlockscreen
+brightnessctl
 brother-dcp-l2665dw
 brscan4
 brscan-skey
@@ -15,6 +16,7 @@ firefox
 flameshot
 fzf
 gearlever
+ghostscript
 gnome-keyring
 htop
 hyfetch
@@ -23,8 +25,9 @@ i3-wm
 isync
 kdeconnect
 keepassxc
-keepmenu
+keepmenu-git
 less
+lxappearance
 mpv
 neovim
 nfs-utils
@@ -41,11 +44,11 @@ ranger
 rsync
 sane
 sane-airscan
+seahorse
 sxiv
 rofi
 rofi-emoji
 tldr
-todotxt
 ttf-hack
 typescript-language-server
 woff2-font-awesome
