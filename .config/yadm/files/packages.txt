@@ -9,6 +9,7 @@ brscan-skey
 cups
 dex
 discord
+dnsmasq
 dunst
 fastfetch
 feh
@@ -45,6 +46,7 @@ rsync
 sane
 sane-airscan
 seahorse
+swtpm
 sxiv
 rofi
 rofi-emoji
