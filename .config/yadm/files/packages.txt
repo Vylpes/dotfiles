@@ -46,6 +46,7 @@ rsync
 sane
 sane-airscan
 seahorse
+steam
 swtpm
 sxiv
 rofi
