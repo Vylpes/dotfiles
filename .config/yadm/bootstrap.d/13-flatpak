@@ -1,0 +1,10 @@
+#!/bin/bash
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+while read -r line; do
+    if flatpak info "$line" >/dev/null 2>&1; then
+        echo "$line installed"
+    else
+        flatpak install -y "$line"
+    fi
+done <$HOME/.config/yadm/files/flatpak.txt

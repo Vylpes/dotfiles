@@ -15,6 +15,7 @@ fastfetch
 feh
 firefox
 flameshot
+flatpak
 fzf
 gearlever
 ghostscript

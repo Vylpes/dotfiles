@@ -1,0 +1,3 @@
+com.obsproject.Studio
+org.DolphinEmu.dolphin-emu
+org.libretro.RetroArch
