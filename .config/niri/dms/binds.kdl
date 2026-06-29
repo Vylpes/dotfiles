@@ -1,11 +1,25 @@
 binds {
     Super+N hotkey-overlay-title="Notifications: Toggle" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
     Super+Shift+Z hotkey-overlay-title="Lock Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
+    Super+Shift+1 { move-column-to-workspace 1; }
+    Super+Shift+2 { move-column-to-workspace 2; }
+    Super+Shift+3 { move-column-to-workspace 3; }
+    Super+Shift+4 { move-column-to-workspace 4; }
+    Super+Shift+5 { move-column-to-workspace 5; }
+    Super+Shift+6 { move-column-to-workspace 6; }
+    Super+Shift+7 { move-column-to-workspace 7; }
+    Super+Shift+8 { move-column-to-workspace 8; }
+    Super+Shift+9 { move-column-to-workspace 9; }
     Super+Comma { focus-monitor-left; }
     Super+P hotkey-overlay-title="Run an Application: fuzzel" { spawn "rofi" "-combi-modi" "window,drun" "-theme" "Arc-Dark" "-font" "hack 18" "-show" "combi"; }
     Super+Period { focus-monitor-right; }
     Super+Shift+B hotkey-overlay-title="Firefox (Private)" { spawn "firefox" "--private-window"; }
+    Super+Shift+C repeat=false { close-window; }
     Super+Shift+Comma { move-column-to-monitor-left; }
+    Super+Shift+H { move-column-left; }
+    Super+Shift+J { move-window-down; }
+    Super+Shift+K { move-window-up; }
+    Super+Shift+L { move-column-right; }
     Super+Shift+Period { move-column-to-monitor-right; }
     Super+Slash { consume-window-into-column; }
     Super+Shift+S { screenshot; }

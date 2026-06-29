@@ -401,7 +401,12 @@
     ]
   },
   "showOnLastDisplay": {},
-  "niriOutputSettings": {},
+  "niriOutputSettings": {
+    "DP-5": {
+      "focusAtStartup": true,
+      "disabled": false
+    }
+  },
   "hyprlandOutputSettings": {},
   "displayProfiles": {},
   "activeDisplayProfile": {},
