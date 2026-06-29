@@ -1,0 +1,3 @@
+systemctl --user enable --now ydotool
+
+systemctl --user add-wants niri.service dms

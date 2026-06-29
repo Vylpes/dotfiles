@@ -6,9 +6,11 @@ brightnessctl
 brother-dcp-l2665dw
 brscan4
 brscan-skey
+cava
 cups
 dex
 discord
+dms-shell-niri
 dnsmasq
 dunst
 fastfetch
@@ -30,9 +32,11 @@ keepassxc
 keepmenu-git
 less
 lxappearance
+matugen
 mpv
 neovim
 nfs-utils
+niri
 noto-fonts-emoji
 pam-gnupg
 pavucontrol
@@ -42,6 +46,7 @@ plexamp-appimage
 pulseaudio-control
 picom
 polybar
+qt6-multimedia-ffmpeg
 ranger
 rsync
 sane
@@ -58,6 +63,10 @@ typescript-language-server
 woff2-font-awesome
 xborder-git
 xclip
+xdg-desktop-portal-gnome
+xdg-desktop-portal-gtk
 xorg-xinit
+xwayland-satellite
+ydotool
 yt-dlp
 zsh
