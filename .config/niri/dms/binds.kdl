@@ -1,8 +1,13 @@
 binds {
     Super+N hotkey-overlay-title="Notifications: Toggle" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
     Super+Shift+Z hotkey-overlay-title="Lock Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
+    Super+Comma { focus-monitor-left; }
     Super+P hotkey-overlay-title="Run an Application: fuzzel" { spawn "rofi" "-combi-modi" "window,drun" "-theme" "Arc-Dark" "-font" "hack 18" "-show" "combi"; }
+    Super+Period { focus-monitor-right; }
     Super+Shift+B hotkey-overlay-title="Firefox (Private)" { spawn "firefox" "--private-window"; }
+    Super+Shift+Comma { move-column-to-monitor-left; }
+    Super+Shift+Period { move-column-to-monitor-right; }
+    Super+Slash { consume-window-into-column; }
     Super+Shift+S { screenshot; }
     Super+A hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Super+Alt+P hotkey-overlay-title="Keepmenu" { spawn "keepmenu"; }
