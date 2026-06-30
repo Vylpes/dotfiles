@@ -26,4 +26,5 @@ binds {
     Super+A hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Super+Alt+P hotkey-overlay-title="Keepmenu" { spawn "keepmenu"; }
     Super+B hotkey-overlay-title="Run firefox" { spawn "firefox"; }
+    Super+X hotkey-overlay-title="Open file manager (Nautilus)" { spawn "nautilus"; }
 }
