@@ -4,3 +4,5 @@ if command -v nvm >/dev/null 2>&1; then
 else
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 fi
+
+yarn global add typescript typescript-language-server

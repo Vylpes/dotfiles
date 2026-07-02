@@ -31,6 +31,7 @@ return require("packer").startup {
     use 'MunifTanjim/prettier.nvim'
     use 'OmniSharp/omnisharp-vim'
     use 'folke/which-key.nvim'
+    use 'pmizio/typescript-tools.nvim'
 
     -- Install and compile Plugins
     if packer_bootstrap then
