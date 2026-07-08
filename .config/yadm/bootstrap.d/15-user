@@ -1,0 +1,1 @@
+sudo usermod -aG libvirt,docker vylpes
