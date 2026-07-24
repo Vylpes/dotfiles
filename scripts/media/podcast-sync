@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""Sync downloaded podcasts to another location.
+
+Copies files from SOURCE into DEST (preserving Show/episode layout), skips
+files already present, then asks before deleting anything on DEST that is
+no longer in SOURCE (so you can keep unaired / unlistened episodes).
+
+Usage:
+  podcast-sync <source> <dest> [--dry-run] [--copy-only]
+"""
+
+from __future__ import annotations
+
+import argparse
+import shutil
+import sys
+from pathlib import Path
+
+# Treat these as podcast media / artwork to sync. Other files under a show
+# folder (e.g. .nfo) are ignored unless --all-files is set.
+DEFAULT_SUFFIXES = {
+    ".mp3",
+    ".m4a",
+    ".m4b",
+    ".aac",
+    ".ogg",
+    ".opus",
+    ".flac",
+    ".wav",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+}
+
+
+def iter_media_files(root: Path, all_files: bool) -> dict[str, Path]:
+    """Map relative posix path -> absolute path for files under root."""
+    root = root.resolve()
+    found: dict[str, Path] = {}
+    if not root.is_dir():
+        return found
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.name.startswith("."):
+            continue
+        # Skip anything under a hidden directory component
+        try:
+            rel = path.relative_to(root)
+        except ValueError:
+            continue
+        if any(part.startswith(".") for part in rel.parts):
+            continue
+        if not all_files and path.suffix.lower() not in DEFAULT_SUFFIXES:
+            continue
+        found[rel.as_posix()] = path
+    return found
+
+
+def prune_empty_parents(start: Path, dest: Path) -> None:
+    dest_r = dest.resolve()
+    current = start.parent.resolve() if start.is_file() or not start.exists() else start.resolve()
+    if start.exists() and start.is_file():
+        current = start.resolve().parent
+
+    while True:
+        if current == dest_r:
+            break
+        try:
+            current.relative_to(dest_r)
+        except ValueError:
+            break
+        try:
+            if any(current.iterdir()):
+                break
+        except OSError:
+            break
+        parent = current.parent
+        try:
+            current.rmdir()
+        except OSError:
+            break
+        current = parent
+
+
+def ensure_under(dest: Path, candidate: Path) -> Path:
+    dest_r = dest.resolve()
+    cand_r = candidate.resolve()
+    try:
+        cand_r.relative_to(dest_r)
+    except ValueError as exc:
+        raise ValueError(f"path escapes destination: {candidate}") from exc
+    return cand_r
+
+
+def prompt_delete(rel: str, index: int, total: int) -> str:
+    """Return one of: y, n, a, s, q."""
+    while True:
+        try:
+            answer = input(
+                f"[{index}/{total}] Delete from destination?\n"
+                f"  {rel}\n"
+                f"  [y]es / [N]o / [a]ll remaining / [s]kip all / [q]uit > "
+            ).strip().lower()
+        except EOFError:
+            return "s"
+        if answer in ("", "n", "no"):
+            return "n"
+        if answer in ("y", "yes"):
+            return "y"
+        if answer in ("a", "all"):
+            return "a"
+        if answer in ("s", "skip"):
+            return "s"
+        if answer in ("q", "quit"):
+            return "q"
+        print("Please answer y, n, a, s, or q.")
+
+
+def cmd_sync(args: argparse.Namespace) -> int:
+    source = args.source.expanduser().resolve()
+    dest = args.destination.expanduser().resolve()
+
+    if not source.is_dir():
+        print(f"error: source is not a directory: {source}", file=sys.stderr)
+        return 1
+
+    if not args.dry_run:
+        dest.mkdir(parents=True, exist_ok=True)
+    elif not dest.exists():
+        # Dry-run against a missing dest is fine for copy preview
+        pass
+
+    src_files = iter_media_files(source, args.all_files)
+    dest_files = iter_media_files(dest, args.all_files) if dest.is_dir() else {}
+
+    if not src_files:
+        print(f"warning: no matching files under {source}", file=sys.stderr)
+
+    copied = skipped = errors = 0
+
+    for rel, src_path in sorted(src_files.items()):
+        dest_path = dest / Path(rel)
+        try:
+            if dest.exists() or not args.dry_run:
+                # Only enforce containment when dest exists / will exist
+                if dest.exists():
+                    ensure_under(dest, dest_path)
+        except ValueError as exc:
+            print(f"error:   {exc}", file=sys.stderr)
+            errors += 1
+            continue
+
+        if dest_path.exists():
+            print(f"skip:    {rel}")
+            skipped += 1
+            continue
+
+        if args.dry_run:
+            print(f"copy:    {rel}")
+            copied += 1
+            continue
+
+        try:
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src_path, dest_path)
+            print(f"copied:  {rel}")
+            copied += 1
+        except OSError as exc:
+            print(f"error:   {src_path}: {exc}", file=sys.stderr)
+            errors += 1
+
+    deleted = kept = 0
+
+    if args.copy_only:
+        print(
+            f"\nDone. copied={copied} skipped={skipped} "
+            f"deleted={deleted} kept={kept} errors={errors}"
+        )
+        return 1 if errors else 0
+
+    extras = sorted(set(dest_files) - set(src_files))
+    if not extras:
+        print(
+            f"\nDone. copied={copied} skipped={skipped} "
+            f"deleted={deleted} kept={kept} errors={errors}"
+        )
+        return 1 if errors else 0
+
+    print(f"\n{len(extras)} file(s) on destination but not in source:")
+    for rel in extras:
+        print(f"  - {rel}")
+    print()
+
+    if args.dry_run:
+        for rel in extras:
+            print(f"purge?:  {rel}")
+        print(
+            f"\nDone (dry-run). copied={copied} skipped={skipped} "
+            f"would_ask_delete={len(extras)} errors={errors}"
+        )
+        return 1 if errors else 0
+
+    if not sys.stdin.isatty():
+        print(
+            "note: stdin is not a TTY — reading y/n answers from the pipe "
+            "(use --copy-only to skip the delete phase)",
+            file=sys.stderr,
+        )
+
+    mode: str | None = None  # None = ask each; a = delete all; s = keep all
+    total = len(extras)
+    for i, rel in enumerate(extras, start=1):
+        if mode == "s":
+            print(f"keep:    {rel}")
+            kept += 1
+            continue
+        if mode == "a":
+            decision = "y"
+        else:
+            decision = prompt_delete(rel, i, total)
+            if decision == "a":
+                mode = "a"
+                decision = "y"
+            elif decision == "s":
+                mode = "s"
+                print(f"keep:    {rel}")
+                kept += 1
+                continue
+            elif decision == "q":
+                print("quit:    remaining extras left untouched")
+                kept += 1 + (total - i)
+                break
+            elif decision == "n":
+                print(f"keep:    {rel}")
+                kept += 1
+                continue
+
+        dest_path = dest / Path(rel)
+        try:
+            ensure_under(dest, dest_path)
+        except ValueError as exc:
+            print(f"error:   {exc}", file=sys.stderr)
+            errors += 1
+            continue
+
+        if not dest_path.exists():
+            print(f"gone:    {rel}")
+            continue
+
+        try:
+            dest_path.unlink()
+            print(f"deleted: {rel}")
+            deleted += 1
+            prune_empty_parents(dest_path, dest)
+        except OSError as exc:
+            print(f"error:   {dest_path}: {exc}", file=sys.stderr)
+            errors += 1
+
+    print(
+        f"\nDone. copied={copied} skipped={skipped} "
+        f"deleted={deleted} kept={kept} errors={errors}"
+    )
+    return 1 if errors else 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="podcast-sync",
+        description=(
+            "Copy podcasts from a download folder to another location, "
+            "confirming before deleting destination files missing from source."
+        ),
+    )
+    parser.add_argument("source", type=Path, help="Folder of currently downloaded podcasts")
+    parser.add_argument("destination", type=Path, help="Destination folder (e.g. USB / phone sync dir)")
+    parser.add_argument("--dry-run", action="store_true", help="Show actions without copying or deleting")
+    parser.add_argument(
+        "--copy-only",
+        action="store_true",
+        help="Only copy new files; never consider deletes",
+    )
+    parser.add_argument(
+        "--all-files",
+        action="store_true",
+        help="Sync all non-hidden files (default: audio + cover images only)",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return cmd_sync(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

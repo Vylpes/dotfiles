@@ -1,0 +1,517 @@
+#!/usr/bin/env python3
+"""Load / unload M3U playlists onto a destination with shared-file awareness.
+
+Ownership is tracked in DEST/.playlist-loads/<id>.json. unload only deletes
+files that no other loaded playlist still claims. Reloading a playlist also
+purges tracks that left the .m3u unless another load still claims them.
+
+Usage:
+  playlist-sync load   <playlist.m3u> <dest> [--base DIR] [--as NAME] [--dry-run] [--flat]
+  playlist-sync unload <playlist|name> <dest> [--dry-run]
+  playlist-sync list   <dest>
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+LOADS_DIR_NAME = ".playlist-loads"
+
+
+# ---------------------------------------------------------------------------
+# Shared playlist / path helpers
+# ---------------------------------------------------------------------------
+
+
+def iter_playlist_entries(playlist: Path) -> list[str]:
+    text = playlist.read_text(encoding="utf-8", errors="replace")
+    if text.startswith("\ufeff"):
+        text = text[1:]
+
+    entries: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("file://"):
+            line = line[7:]
+            if line.startswith("//"):
+                line = line[1:] if line.startswith("///") else line
+        entries.append(line)
+    return entries
+
+
+def resolve_source(entry: str, playlist_dir: Path, base: Path) -> Path | None:
+    path = Path(entry)
+    if path.is_absolute():
+        return path if path.is_file() else None
+
+    candidate = (base / path).resolve()
+    if candidate.is_file():
+        return candidate
+
+    if base != playlist_dir:
+        alt = (playlist_dir / path).resolve()
+        if alt.is_file():
+            return alt
+
+    return None
+
+
+def relative_dest_parts(entry: str, source: Path) -> Path:
+    """Build destination-relative path from the playlist entry when possible."""
+    entry_path = Path(entry)
+    if not entry_path.is_absolute():
+        parts = [p for p in entry_path.parts if p not in (".",)]
+        if parts:
+            return Path(*parts)
+    return Path(source.name)
+
+
+def playlist_id_from_arg(playlist_or_name: str | Path, as_name: str | None = None) -> str:
+    if as_name:
+        return as_name
+    path = Path(playlist_or_name)
+    # Bare id (no suffix / not an existing path intent): use as-is if no .m3u(8)
+    name = path.name
+    if name.lower().endswith((".m3u", ".m3u8")):
+        return path.stem
+    return name
+
+
+def dest_relative_str(path: Path) -> str:
+    """Normalize a relative dest path to a portable string key."""
+    return path.as_posix()
+
+
+def ensure_under_dest(dest: Path, candidate: Path) -> Path:
+    """Resolve candidate and ensure it stays inside dest."""
+    dest_r = dest.resolve()
+    cand_r = candidate.resolve()
+    try:
+        cand_r.relative_to(dest_r)
+    except ValueError as exc:
+        raise ValueError(f"path escapes destination: {candidate}") from exc
+    return cand_r
+
+
+# ---------------------------------------------------------------------------
+# Manifest helpers
+# ---------------------------------------------------------------------------
+
+
+def loads_dir(dest: Path) -> Path:
+    return dest / LOADS_DIR_NAME
+
+
+def manifest_path(dest: Path, playlist_id: str) -> Path:
+    return loads_dir(dest) / f"{playlist_id}.json"
+
+
+def read_manifest(path: Path) -> dict[str, Any]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or "id" not in data or "files" not in data:
+        raise ValueError(f"invalid manifest: {path}")
+    if not isinstance(data["files"], list):
+        raise ValueError(f"invalid manifest files list: {path}")
+    return data
+
+
+def write_manifest(path: Path, data: dict[str, Any], dry_run: bool) -> None:
+    if dry_run:
+        print(f"manifest: would write {path}")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def iter_manifests(dest: Path) -> list[tuple[str, Path, dict[str, Any]]]:
+    directory = loads_dir(dest)
+    if not directory.is_dir():
+        return []
+    results: list[tuple[str, Path, dict[str, Any]]] = []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            data = read_manifest(path)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"warning: skipping bad manifest {path}: {exc}", file=sys.stderr)
+            continue
+        results.append((str(data.get("id", path.stem)), path, data))
+    return results
+
+
+def other_claimed_files(dest: Path, exclude_id: str) -> set[str]:
+    claimed: set[str] = set()
+    for pid, _path, data in iter_manifests(dest):
+        if pid == exclude_id:
+            continue
+        for rel in data.get("files", []):
+            claimed.add(str(rel))
+    return claimed
+
+
+def prune_empty_parents_safe(start: Path, dest: Path) -> None:
+    """Prune empty dirs from start's parent up to but not including dest."""
+    dest_r = dest.resolve()
+    if start.exists() and start.is_file():
+        current = start.resolve().parent
+    else:
+        current = start.parent.resolve()
+
+    while True:
+        if current == dest_r:
+            break
+        try:
+            current.relative_to(dest_r)
+        except ValueError:
+            break
+        try:
+            if any(current.iterdir()):
+                break
+        except OSError:
+            break
+        parent = current.parent
+        try:
+            current.rmdir()
+        except OSError:
+            break
+        current = parent
+
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+
+def cmd_load(args: argparse.Namespace) -> int:
+    playlist = args.playlist.expanduser().resolve()
+    destination = args.destination.expanduser().resolve()
+    playlist_dir = playlist.parent
+    base = args.base.expanduser().resolve() if args.base else playlist_dir
+    playlist_id = playlist_id_from_arg(playlist, args.as_name)
+
+    if not playlist.is_file():
+        print(f"error: playlist not found: {playlist}", file=sys.stderr)
+        return 1
+
+    try:
+        entries = iter_playlist_entries(playlist)
+    except OSError as exc:
+        print(f"error: could not read playlist: {exc}", file=sys.stderr)
+        return 1
+
+    if not entries:
+        print("error: playlist has no track entries", file=sys.stderr)
+        return 1
+
+    if not args.dry_run:
+        destination.mkdir(parents=True, exist_ok=True)
+
+    copied = skipped = missing = errors = 0
+    claimed: list[str] = []
+
+    for entry in entries:
+        source = resolve_source(entry, playlist_dir, base)
+        if source is None:
+            print(f"missing: {entry}")
+            missing += 1
+            continue
+
+        if args.flat:
+            rel = Path(source.name)
+        else:
+            rel = relative_dest_parts(entry, source)
+
+        dest_file = destination / rel
+        try:
+            ensure_under_dest(destination, dest_file)
+        except ValueError as exc:
+            print(f"error:   {exc}", file=sys.stderr)
+            errors += 1
+            continue
+
+        rel_key = dest_relative_str(rel)
+
+        if dest_file.exists():
+            print(f"skip:    {rel_key}")
+            skipped += 1
+            claimed.append(rel_key)
+            continue
+
+        if args.dry_run:
+            print(f"copy:    {source} -> {dest_file}")
+            copied += 1
+            claimed.append(rel_key)
+            continue
+
+        try:
+            dest_file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, dest_file)
+            print(f"copied:  {rel_key}")
+            copied += 1
+            claimed.append(rel_key)
+        except OSError as exc:
+            print(f"error:   {source}: {exc}", file=sys.stderr)
+            errors += 1
+
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    unique_claimed: list[str] = []
+    for rel_key in claimed:
+        if rel_key not in seen:
+            seen.add(rel_key)
+            unique_claimed.append(rel_key)
+
+    new_claimed_set = set(unique_claimed)
+    purged = kept_shared = gone = 0
+
+    # On reload: drop files that left this playlist unless another load still claims them
+    mpath = manifest_path(destination, playlist_id)
+    if mpath.is_file():
+        try:
+            old_data = read_manifest(mpath)
+            old_files = {str(f) for f in old_data.get("files", [])}
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"warning: could not read previous manifest for purge: {exc}", file=sys.stderr)
+            old_files = set()
+
+        stale = old_files - new_claimed_set
+        if stale:
+            keep_set = other_claimed_files(destination, playlist_id)
+            for rel_key in sorted(stale):
+                rel = Path(rel_key)
+                dest_file = destination / rel
+                try:
+                    ensure_under_dest(destination, dest_file)
+                except ValueError as exc:
+                    print(f"error:   {exc}", file=sys.stderr)
+                    errors += 1
+                    continue
+
+                if rel_key in keep_set:
+                    print(f"keep:    {rel_key}")
+                    kept_shared += 1
+                    continue
+
+                if not dest_file.exists():
+                    print(f"gone:    {rel_key}")
+                    gone += 1
+                    continue
+
+                if args.dry_run:
+                    print(f"purge:   {rel_key}")
+                    purged += 1
+                    continue
+
+                try:
+                    dest_file.unlink()
+                    print(f"purged:  {rel_key}")
+                    purged += 1
+                    prune_empty_parents_safe(dest_file, destination)
+                except OSError as exc:
+                    print(f"error:   {dest_file}: {exc}", file=sys.stderr)
+                    errors += 1
+
+    dest_m3u = destination / f"{playlist_id}.m3u"
+    if args.dry_run:
+        print(f"playlist: would copy -> {dest_m3u}")
+    else:
+        try:
+            shutil.copy2(playlist, dest_m3u)
+            print(f"playlist: {dest_m3u.name}")
+        except OSError as exc:
+            print(f"error: could not copy playlist file: {exc}", file=sys.stderr)
+            errors += 1
+
+    manifest = {
+        "id": playlist_id,
+        "source_m3u": str(playlist),
+        "loaded_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+        "flat": bool(args.flat),
+        "files": unique_claimed,
+    }
+    write_manifest(mpath, manifest, args.dry_run)
+
+    print(
+        f"\nDone. id={playlist_id} copied={copied} skipped={skipped} "
+        f"missing={missing} claimed={len(unique_claimed)} "
+        f"purged={purged} kept_shared={kept_shared} gone={gone} errors={errors}"
+    )
+    return 1 if errors else 0
+
+
+def cmd_unload(args: argparse.Namespace) -> int:
+    destination = args.destination.expanduser().resolve()
+    playlist_id = playlist_id_from_arg(args.playlist_or_name)
+
+    if not destination.is_dir():
+        print(f"error: destination is not a directory: {destination}", file=sys.stderr)
+        return 1
+
+    mpath = manifest_path(destination, playlist_id)
+    if not mpath.is_file():
+        print(f"error: no loaded playlist '{playlist_id}' at {destination}", file=sys.stderr)
+        return 1
+
+    try:
+        data = read_manifest(mpath)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"error: could not read manifest: {exc}", file=sys.stderr)
+        return 1
+
+    files = [str(f) for f in data.get("files", [])]
+    keep_set = other_claimed_files(destination, playlist_id)
+
+    deleted = kept = gone = errors = 0
+
+    for rel_key in files:
+        rel = Path(rel_key)
+        dest_file = destination / rel
+        try:
+            ensure_under_dest(destination, dest_file)
+        except ValueError as exc:
+            print(f"error:   {exc}", file=sys.stderr)
+            errors += 1
+            continue
+
+        if rel_key in keep_set:
+            print(f"keep:    {rel_key}")
+            kept += 1
+            continue
+
+        if not dest_file.exists():
+            print(f"gone:    {rel_key}")
+            gone += 1
+            continue
+
+        if args.dry_run:
+            print(f"delete:  {rel_key}")
+            deleted += 1
+            continue
+
+        try:
+            dest_file.unlink()
+            print(f"deleted: {rel_key}")
+            deleted += 1
+            prune_empty_parents_safe(dest_file, destination)
+        except OSError as exc:
+            print(f"error:   {dest_file}: {exc}", file=sys.stderr)
+            errors += 1
+
+    dest_m3u = destination / f"{playlist_id}.m3u"
+    if dest_m3u.exists():
+        if args.dry_run:
+            print(f"playlist: would remove {dest_m3u.name}")
+        else:
+            try:
+                dest_m3u.unlink()
+                print(f"playlist: removed {dest_m3u.name}")
+            except OSError as exc:
+                print(f"error: could not remove playlist file: {exc}", file=sys.stderr)
+                errors += 1
+
+    if args.dry_run:
+        print(f"manifest: would remove {mpath}")
+    else:
+        try:
+            mpath.unlink()
+            print(f"manifest: removed {mpath.name}")
+            # Prune empty .playlist-loads if no other manifests
+            loads = loads_dir(destination)
+            if loads.is_dir():
+                try:
+                    if not any(loads.iterdir()):
+                        loads.rmdir()
+                except OSError:
+                    pass
+        except OSError as exc:
+            print(f"error: could not remove manifest: {exc}", file=sys.stderr)
+            errors += 1
+
+    print(
+        f"\nDone. id={playlist_id} deleted={deleted} kept={kept} gone={gone} errors={errors}"
+    )
+    return 1 if errors else 0
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    destination = args.destination.expanduser().resolve()
+    if not destination.is_dir():
+        print(f"error: destination is not a directory: {destination}", file=sys.stderr)
+        return 1
+
+    manifests = iter_manifests(destination)
+    if not manifests:
+        print(f"No loaded playlists in {destination}")
+        return 0
+
+    for pid, _path, data in manifests:
+        n = len(data.get("files", []))
+        source = data.get("source_m3u", "?")
+        loaded_at = data.get("loaded_at", "?")
+        print(f"{pid}\t{n} tracks\tloaded {loaded_at}\tfrom {source}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="playlist-sync",
+        description="Load/unload M3U playlists onto a destination with shared-file tracking.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    load_p = sub.add_parser("load", help="Copy a playlist's tracks to the destination and record ownership")
+    load_p.add_argument("playlist", type=Path, help="Path to the .m3u / .m3u8 playlist file")
+    load_p.add_argument("destination", type=Path, help="Directory to copy music into")
+    load_p.add_argument(
+        "--base",
+        type=Path,
+        help="Root used to resolve relative playlist paths (default: playlist directory)",
+    )
+    load_p.add_argument("--as", dest="as_name", metavar="NAME", help="Playlist id override (default: filename stem)")
+    load_p.add_argument("--dry-run", action="store_true", help="Show actions without writing")
+    load_p.add_argument(
+        "--flat",
+        action="store_true",
+        help="Copy files into the destination root (basename only) instead of preserving folders",
+    )
+    load_p.set_defaults(func=cmd_load)
+
+    unload_p = sub.add_parser(
+        "unload",
+        help="Remove a loaded playlist's exclusive files from the destination",
+    )
+    unload_p.add_argument(
+        "playlist_or_name",
+        help="Playlist id or path (stem used as id), e.g. gym or gym.m3u",
+    )
+    unload_p.add_argument("destination", type=Path, help="Destination directory previously loaded into")
+    unload_p.add_argument("--dry-run", action="store_true", help="Show actions without deleting")
+    unload_p.set_defaults(func=cmd_unload)
+
+    list_p = sub.add_parser("list", help="List playlists currently loaded on a destination")
+    list_p.add_argument("destination", type=Path, help="Destination directory")
+    list_p.set_defaults(func=cmd_list)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return int(args.func(args))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
