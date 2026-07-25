@@ -213,7 +213,7 @@ def cmd_load(args: argparse.Namespace) -> int:
     if not args.dry_run:
         destination.mkdir(parents=True, exist_ok=True)
 
-    copied = skipped = missing = errors = 0
+    copied = updated = skipped = missing = errors = 0
     claimed: list[str] = []
 
     for entry in entries:
@@ -237,24 +237,40 @@ def cmd_load(args: argparse.Namespace) -> int:
             continue
 
         rel_key = dest_relative_str(rel)
-
-        if dest_file.exists():
-            print(f"skip:    {rel_key}")
-            skipped += 1
-            claimed.append(rel_key)
-            continue
+        exists = dest_file.exists()
+        source_newer = False
+        if exists:
+            try:
+                source_newer = source.stat().st_mtime > dest_file.stat().st_mtime
+            except OSError as exc:
+                print(f"error:   {source}: {exc}", file=sys.stderr)
+                errors += 1
+                continue
+            if not source_newer:
+                print(f"skip:    {rel_key}")
+                skipped += 1
+                claimed.append(rel_key)
+                continue
 
         if args.dry_run:
-            print(f"copy:    {source} -> {dest_file}")
-            copied += 1
+            action = "update" if exists else "copy"
+            print(f"{action}:   {source} -> {dest_file}")
+            if exists:
+                updated += 1
+            else:
+                copied += 1
             claimed.append(rel_key)
             continue
 
         try:
             dest_file.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, dest_file)
-            print(f"copied:  {rel_key}")
-            copied += 1
+            if exists:
+                print(f"updated: {rel_key}")
+                updated += 1
+            else:
+                print(f"copied:  {rel_key}")
+                copied += 1
             claimed.append(rel_key)
         except OSError as exc:
             print(f"error:   {source}: {exc}", file=sys.stderr)
@@ -339,7 +355,7 @@ def cmd_load(args: argparse.Namespace) -> int:
     write_manifest(mpath, manifest, args.dry_run)
 
     print(
-        f"\nDone. id={playlist_id} copied={copied} skipped={skipped} "
+        f"\nDone. id={playlist_id} copied={copied} updated={updated} skipped={skipped} "
         f"missing={missing} claimed={len(unique_claimed)} "
         f"purged={purged} kept_shared={kept_shared} gone={gone} errors={errors}"
     )
