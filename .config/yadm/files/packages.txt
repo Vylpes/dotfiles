@@ -1,5 +1,6 @@
 alacritty
 arandr
+ark
 autorandr
 betterlockscreen
 brightnessctl
