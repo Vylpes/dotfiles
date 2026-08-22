@@ -1,3 +1,5 @@
+com.github.tchx84.Flatseal
 com.obsproject.Studio
+com.usebottles.bottles
 org.DolphinEmu.dolphin-emu
 org.libretro.RetroArch
