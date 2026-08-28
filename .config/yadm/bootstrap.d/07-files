@@ -4,5 +4,8 @@ mkdir -p $HOME/Downloads
 mkdir -p $HOME/Desktop
 mkdir -p $HOME/Pictures/captures
 
+mkdir -p $HOME/.cache/vylpes-scripts
+
 sudo mkdir -p /mnt/usb0
 sudo mkdir -p /mnt/nfs0
+sudo mkdir -p /mnt/{files,media,share}
