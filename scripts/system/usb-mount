@@ -1,0 +1,379 @@
+#!/usr/bin/env bash
+# Interactive USB mount/unmount helper.
+#
+# Usage:
+#   usb-mount [options] [command]
+#   usb-mount mount    # pick a device and mount (default)
+#   usb-mount unmount  # pick a mounted device and unmount
+#   usb-mount list     # show removable USB devices
+#   usb-mount cd       # cd to a mounted USB device
+#
+# To cd into the mount point from your current shell:
+#   source usb-mount cd
+#   eval "$(usb-mount cd)"
+
+set -euo pipefail
+
+MOUNT_OPTS=""
+FSTYPE=""
+MOUNT_BASE=""
+USE_SUDO=0
+COMMAND="mount"
+
+usage() {
+    cat <<'EOF'
+usb-mount — interactively mount or unmount USB devices
+
+Commands:
+  mount, m          Pick a device and mount it (default)
+  unmount, umount, u Pick a mounted device and unmount it
+  cd                cd to a mounted USB device
+  list, ls          List removable USB block devices
+
+Options:
+  -o, --options OPTS   Mount options (e.g. ro,noatime)
+  -t, --type TYPE      Filesystem type (for manual/sudo mounts)
+  -m, --mountpoint DIR Base directory for manual mounts (default: /run/media/$USER)
+  --sudo               Use sudo mount/umount instead of udisksctl
+  -h, --help           Show this help
+
+Examples:
+  usb-mount
+  usb-mount -o ro mount
+  usb-mount unmount
+  source usb-mount cd
+  eval "$(usb-mount cd)"
+
+EOF
+}
+
+is_sourced() {
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]]
+}
+
+log() {
+    printf '%s\n' "$*" >&2
+}
+
+die() {
+    log "error: $*"
+    return 1 2>/dev/null || exit 1
+}
+
+have_udisks() {
+    command -v udisksctl >/dev/null 2>&1
+}
+
+dev_path() {
+    local name="${1#/dev/}"
+    printf '/dev/%s' "$name"
+}
+
+# Print candidate lines: dev|mountpoint|fstype|label|size|desc
+list_candidates() {
+    local mode="$1" # mountable | mounted
+    local -A usb_disks=()
+    local line NAME TYPE MOUNTPOINT FSTYPE LABEL SIZE PKNAME RM TRAN
+
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        unset NAME TYPE MOUNTPOINT FSTYPE LABEL SIZE PKNAME RM TRAN
+        eval "$line"
+        if [[ "$TYPE" == "disk" && "$TRAN" == "usb" ]]; then
+            usb_disks["$NAME"]=1
+        fi
+    done < <(lsblk -P -o NAME,TYPE,TRAN)
+
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        unset NAME TYPE MOUNTPOINT FSTYPE LABEL SIZE PKNAME RM TRAN
+        eval "$line"
+
+        if [[ "$TYPE" != "part" && "$TYPE" != "disk" ]]; then
+            continue
+        fi
+
+        local is_usb=0
+        if [[ -n "${usb_disks[$NAME]:-}" ]]; then
+            is_usb=1
+        elif [[ -n "$PKNAME" && -n "${usb_disks[$PKNAME]:-}" ]]; then
+            is_usb=1
+        elif [[ "$TRAN" == "usb" ]]; then
+            is_usb=1
+        fi
+        (( is_usb )) || continue
+
+        if [[ "$TYPE" == "part" && -z "$FSTYPE" ]]; then
+            continue
+        fi
+
+        if [[ "$mode" == "mountable" ]]; then
+            [[ -n "$MOUNTPOINT" ]] && continue
+            [[ -z "$FSTYPE" && "$TYPE" == "disk" ]] && continue
+        else
+            [[ -z "$MOUNTPOINT" ]] && continue
+        fi
+
+        local dev desc
+        dev=$(dev_path "$NAME")
+        desc="$dev"
+        [[ -n "$LABEL" ]] && desc+=" [$LABEL]"
+        [[ -n "$FSTYPE" ]] && desc+=" ($FSTYPE)"
+        desc+=" $SIZE"
+        [[ -n "$MOUNTPOINT" ]] && desc+=" @ $MOUNTPOINT"
+
+        printf '%s|%s|%s|%s|%s|%s\n' "$dev" "$MOUNTPOINT" "$FSTYPE" "$LABEL" "$SIZE" "$desc"
+    done < <(lsblk -P -o NAME,TYPE,MOUNTPOINT,FSTYPE,LABEL,SIZE,PKNAME,TRAN)
+}
+
+pick_candidate() {
+    local mode="$1"
+    local -a lines=()
+    local line
+    while IFS= read -r line; do
+        lines+=("$line")
+    done < <(list_candidates "$mode")
+
+    if ((${#lines[@]} == 0)); then
+        if [[ "$mode" == "mountable" ]]; then
+            die "no unmounted USB devices found"
+        else
+            die "no mounted USB devices found"
+        fi
+    fi
+
+    if ((${#lines[@]} == 1)); then
+        printf '%s\n' "${lines[0]}"
+        return
+    fi
+
+    log ""
+    log "Select a device:"
+    local i=1
+    for line in "${lines[@]}"; do
+        local desc
+        desc="${line##*|}"
+        log "  $i) $desc"
+        ((i++)) || true
+    done
+    log ""
+
+    local choice
+    while true; do
+        read -r -p "Choice [1-${#lines[@]}]: " choice
+        if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= ${#lines[@]})); then
+            printf '%s\n' "${lines[choice - 1]}"
+            return
+        fi
+        log "Invalid choice."
+    done
+}
+
+default_mount_base() {
+    if [[ -n "$MOUNT_BASE" ]]; then
+        printf '%s\n' "$MOUNT_BASE"
+        return
+    fi
+    if [[ -d "/run/media/$USER" ]]; then
+        printf '/run/media/%s\n' "$USER"
+    elif [[ -d "/media/$USER" ]]; then
+        printf '/media/%s\n' "$USER"
+    else
+        printf '/run/media/%s\n' "$USER"
+    fi
+}
+
+mount_device() {
+    local dev="$1" fstype="$2" label="$3"
+    local mount_point=""
+
+    if [[ "$USE_SUDO" -eq 0 ]] && have_udisks; then
+        local -a cmd=(udisksctl mount -b "$dev")
+        [[ -n "$MOUNT_OPTS" ]] && cmd+=(-o "$MOUNT_OPTS")
+        local output
+        if ! output=$("${cmd[@]}" 2>&1); then
+            die "$output"
+        fi
+        if [[ "$output" =~ at[[:space:]]+(.+)$ ]]; then
+            mount_point="${BASH_REMATCH[1]}"
+        else
+            mount_point=$(lsblk -no MOUNTPOINT -n "$dev" | head -1)
+        fi
+    else
+        local base target
+        base=$(default_mount_base)
+        if [[ -n "$label" ]]; then
+            target="$base/$label"
+        else
+            target="$base/$(basename "$dev")"
+        fi
+        mkdir -p "$target"
+
+        local -a cmd=(mount)
+        [[ -n "$FSTYPE" ]] && cmd+=(-t "$FSTYPE")
+        [[ -n "$MOUNT_OPTS" ]] && cmd+=(-o "$MOUNT_OPTS")
+        cmd+=("$dev" "$target")
+
+        if [[ "$EUID" -ne 0 ]]; then
+            cmd=(sudo "${cmd[@]}")
+        fi
+        "${cmd[@]}"
+        mount_point="$target"
+    fi
+
+    [[ -n "$mount_point" ]] || die "mounted $dev but could not determine mount point"
+    printf '%s\n' "$mount_point"
+}
+
+unmount_device() {
+    local dev="$1" mount_point="$2"
+
+    if [[ "$USE_SUDO" -eq 0 ]] && have_udisks; then
+        local output
+        if ! output=$(udisksctl unmount -b "$dev" 2>&1); then
+            die "$output"
+        fi
+        return
+    fi
+
+    local -a cmd=(umount)
+    if [[ -n "$mount_point" ]]; then
+        cmd+=("$mount_point")
+    else
+        cmd+=("$dev")
+    fi
+    if [[ "$EUID" -ne 0 ]]; then
+        cmd=(sudo "${cmd[@]}")
+    fi
+    "${cmd[@]}"
+}
+
+cd_mount_point() {
+    local mount_point="$1"
+
+    if is_sourced; then
+        cd "$mount_point"
+        log "now in $PWD"
+    else
+        printf 'cd %q\n' "$mount_point"
+    fi
+}
+
+cmd_list() {
+    local line desc
+    local found=0
+    while IFS= read -r line; do
+        desc="${line##*|}"
+        printf '%s\n' "$desc"
+        found=1
+    done < <(list_candidates mountable; list_candidates mounted)
+
+    if [[ "$found" -eq 0 ]]; then
+        log "no USB devices found"
+    fi
+}
+
+cmd_mount() {
+    local picked dev mnt fstype label size desc mount_point
+    picked=$(pick_candidate mountable)
+    IFS='|' read -r dev mnt fstype label size desc <<<"$picked"
+
+    log "Mounting $desc ..."
+    mount_point=$(mount_device "$dev" "$fstype" "$label")
+
+    log ""
+    log "Mounted at:"
+    printf '%s\n' "$mount_point"
+}
+
+cmd_unmount() {
+    local picked dev mnt fstype label size desc
+    picked=$(pick_candidate mounted)
+    IFS='|' read -r dev mnt fstype label size desc <<<"$picked"
+
+    log "Unmounting $desc ..."
+    unmount_device "$dev" "$mnt"
+    log "Unmounted $dev"
+}
+
+cmd_cd() {
+    local picked dev mnt fstype label size desc
+    picked=$(pick_candidate mounted)
+    IFS='|' read -r dev mnt fstype label size desc <<<"$picked"
+
+    [[ -n "$mnt" ]] || die "no mount point for $dev"
+    cd_mount_point "$mnt"
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            mount|m)
+                COMMAND="mount"
+                shift
+                ;;
+            unmount|umount|u)
+                COMMAND="unmount"
+                shift
+                ;;
+            list|ls)
+                COMMAND="list"
+                shift
+                ;;
+            cd)
+                COMMAND="cd"
+                shift
+                ;;
+            -o|--options)
+                MOUNT_OPTS="${2:-}"
+                [[ -n "$MOUNT_OPTS" ]] || die "missing value for $1"
+                shift 2
+                ;;
+            -t|--type)
+                FSTYPE="${2:-}"
+                [[ -n "$FSTYPE" ]] || die "missing value for $1"
+                shift 2
+                ;;
+            -m|--mountpoint)
+                MOUNT_BASE="${2:-}"
+                [[ -n "$MOUNT_BASE" ]] || die "missing value for $1"
+                shift 2
+                ;;
+            --sudo)
+                USE_SUDO=1
+                shift
+                ;;
+            -h|--help)
+                usage
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                die "unknown option: $1 (try --help)"
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    if [[ $# -gt 0 ]]; then
+        die "unexpected argument: $1 (try --help)"
+    fi
+
+    case "$COMMAND" in
+        mount) cmd_mount ;;
+        unmount) cmd_unmount ;;
+        cd) cmd_cd ;;
+        list) cmd_list ;;
+    esac
+}
+
+if is_sourced; then
+    parse_args "$@"
+else
+    parse_args "$@" || exit $?
+fi
