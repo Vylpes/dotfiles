@@ -6,7 +6,7 @@ files that no other loaded playlist still claims. Reloading a playlist also
 purges tracks that left the .m3u unless another load still claims them.
 
 Usage:
-  playlist-sync load   <playlist.m3u> <dest> [--base DIR] [--as NAME] [--dry-run] [--flat]
+  playlist-sync load   <playlist.m3u> <dest> [--base DIR] [--as NAME] [--dry-run] [--flat] [-u]
   playlist-sync unload <playlist|name> <dest> [--dry-run]
   playlist-sync list   <dest>
 """
@@ -22,6 +22,9 @@ from pathlib import Path
 from typing import Any
 
 LOADS_DIR_NAME = ".playlist-loads"
+# FAT/exFAT store mtime in 2s steps; without slack, copy2'd files look
+# "newer" on the source forever when dest lives on those filesystems.
+MTIME_SKEW_SECONDS = 2.0
 
 
 # ---------------------------------------------------------------------------
@@ -238,15 +241,19 @@ def cmd_load(args: argparse.Namespace) -> int:
 
         rel_key = dest_relative_str(rel)
         exists = dest_file.exists()
-        source_newer = False
         if exists:
-            try:
-                source_newer = source.stat().st_mtime > dest_file.stat().st_mtime
-            except OSError as exc:
-                print(f"error:   {source}: {exc}", file=sys.stderr)
-                errors += 1
-                continue
-            if not source_newer:
+            should_update = False
+            if args.update:
+                try:
+                    # Require a clear lead past FS timestamp resolution (FAT = 2s).
+                    should_update = (
+                        source.stat().st_mtime - dest_file.stat().st_mtime
+                    ) > MTIME_SKEW_SECONDS
+                except OSError as exc:
+                    print(f"error:   {source}: {exc}", file=sys.stderr)
+                    errors += 1
+                    continue
+            if not should_update:
                 print(f"skip:    {rel_key}")
                 skipped += 1
                 claimed.append(rel_key)
@@ -501,6 +508,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--flat",
         action="store_true",
         help="Copy files into the destination root (basename only) instead of preserving folders",
+    )
+    load_p.add_argument(
+        "-u",
+        "--update",
+        action="store_true",
+        help=(
+            "Overwrite existing dest files only when the source mtime is newer "
+            f"(by more than {MTIME_SKEW_SECONDS:g}s, to tolerate FAT/exFAT). "
+            "Without this flag, existing files are always skipped."
+        ),
     )
     load_p.set_defaults(func=cmd_load)
 

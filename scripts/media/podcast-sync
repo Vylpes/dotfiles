@@ -6,7 +6,7 @@ files already present, then asks before deleting anything on DEST that is
 no longer in SOURCE (so you can keep unaired / unlistened episodes).
 
 Usage:
-  podcast-sync <source> <dest> [--dry-run] [--copy-only]
+  podcast-sync <source> <dest> [--dry-run] [--copy-only] [-u]
 """
 
 from __future__ import annotations
@@ -15,6 +15,10 @@ import argparse
 import shutil
 import sys
 from pathlib import Path
+
+# FAT/exFAT store mtime in 2s steps; without slack, copy2'd files look
+# "newer" on the source forever when dest lives on those filesystems.
+MTIME_SKEW_SECONDS = 2.0
 
 # Treat these as podcast media / artwork to sync. Other files under a show
 # folder (e.g. .nfo) are ignored unless --all-files is set.
@@ -138,7 +142,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
     if not src_files:
         print(f"warning: no matching files under {source}", file=sys.stderr)
 
-    copied = skipped = errors = 0
+    copied = updated = skipped = errors = 0
 
     for rel, src_path in sorted(src_files.items()):
         dest_path = dest / Path(rel)
@@ -152,21 +156,42 @@ def cmd_sync(args: argparse.Namespace) -> int:
             errors += 1
             continue
 
-        if dest_path.exists():
-            print(f"skip:    {rel}")
-            skipped += 1
-            continue
+        exists = dest_path.exists()
+        if exists:
+            should_update = False
+            if args.update:
+                try:
+                    # Require a clear lead past FS timestamp resolution (FAT = 2s).
+                    should_update = (
+                        src_path.stat().st_mtime - dest_path.stat().st_mtime
+                    ) > MTIME_SKEW_SECONDS
+                except OSError as exc:
+                    print(f"error:   {src_path}: {exc}", file=sys.stderr)
+                    errors += 1
+                    continue
+            if not should_update:
+                print(f"skip:    {rel}")
+                skipped += 1
+                continue
 
         if args.dry_run:
-            print(f"copy:    {rel}")
-            copied += 1
+            action = "update" if exists else "copy"
+            print(f"{action}:  {rel}")
+            if exists:
+                updated += 1
+            else:
+                copied += 1
             continue
 
         try:
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src_path, dest_path)
-            print(f"copied:  {rel}")
-            copied += 1
+            if exists:
+                print(f"updated: {rel}")
+                updated += 1
+            else:
+                print(f"copied:  {rel}")
+                copied += 1
         except OSError as exc:
             print(f"error:   {src_path}: {exc}", file=sys.stderr)
             errors += 1
@@ -175,7 +200,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
 
     if args.copy_only:
         print(
-            f"\nDone. copied={copied} skipped={skipped} "
+            f"\nDone. copied={copied} updated={updated} skipped={skipped} "
             f"deleted={deleted} kept={kept} errors={errors}"
         )
         return 1 if errors else 0
@@ -183,7 +208,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
     extras = sorted(set(dest_files) - set(src_files))
     if not extras:
         print(
-            f"\nDone. copied={copied} skipped={skipped} "
+            f"\nDone. copied={copied} updated={updated} skipped={skipped} "
             f"deleted={deleted} kept={kept} errors={errors}"
         )
         return 1 if errors else 0
@@ -197,7 +222,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
         for rel in extras:
             print(f"purge?:  {rel}")
         print(
-            f"\nDone (dry-run). copied={copied} skipped={skipped} "
+            f"\nDone (dry-run). copied={copied} updated={updated} skipped={skipped} "
             f"would_ask_delete={len(extras)} errors={errors}"
         )
         return 1 if errors else 0
@@ -259,7 +284,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
             errors += 1
 
     print(
-        f"\nDone. copied={copied} skipped={skipped} "
+        f"\nDone. copied={copied} updated={updated} skipped={skipped} "
         f"deleted={deleted} kept={kept} errors={errors}"
     )
     return 1 if errors else 0
@@ -285,6 +310,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--all-files",
         action="store_true",
         help="Sync all non-hidden files (default: audio + cover images only)",
+    )
+    parser.add_argument(
+        "-u",
+        "--update",
+        action="store_true",
+        help=(
+            "Overwrite existing dest files only when the source mtime is newer "
+            f"(by more than {MTIME_SKEW_SECONDS:g}s, to tolerate FAT/exFAT). "
+            "Without this flag, existing files are always skipped."
+        ),
     )
     return parser
 
