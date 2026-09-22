@@ -22,8 +22,8 @@ alias yt-dlp-mp4="yt-dlp --no-config --format 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp
 alias t="todo.sh"
 alias r="ranger"
 
-alias fd="mount /mnt/files && rsync -avhP --delete /mnt/files/ ~/Documents/Files/"
-alias fu="mount /mnt/files && rsync -avhP --delete ~/Documents/Files/ /mnt/files/"
+alias fd="mount /mnt/files; rsync -avhP --delete /mnt/files/ ~/Documents/Files/"
+alias fu="mount /mnt/files; rsync -avhP --delete ~/Documents/Files/ /mnt/files/"
 alias fm="mount /mnt/files"
 
 alias gco="git checkout"
