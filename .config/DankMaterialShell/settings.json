@@ -1,10 +1,9 @@
 {
   "currentThemeName": "blue",
   "cornerRadius": 12,
+  "clockFormat": "24h",
   "windSpeedUnit": "ms",
-  "nightModeEnabled": false,
   "barElevationEnabled": false,
-  "batteryPillPercentSign": false,
   "controlCenterShowMicPercent": true,
   "controlCenterWidgets": [
     {
@@ -61,9 +60,6 @@
   "showWorkspaceIndex": true,
   "showWorkspaceApps": true,
   "appIdSubstitutions": [],
-  "greeterUse24HourClock": true,
-  "greeterShowSeconds": false,
-  "greeterPadHours12Hour": false,
   "cursorSettings": {
     "theme": "breeze_cursors",
     "size": 24,
@@ -81,8 +77,9 @@
     }
   },
   "soundNewNotification": false,
-  "gtkThemingEnabled": false,
-  "qtThemingEnabled": false,
+  "dockSeparatePinnedAndRunningApps": true,
+  "dockIndicatorStyle": "line",
+  "dockLauncherEnabled": true,
   "osdPowerProfileEnabled": true,
   "screenPreferences": {
     "wallpaper": [
@@ -157,15 +154,50 @@
       "shadowOpacity": 60,
       "shadowColorMode": "text",
       "shadowCustomColor": "#000000",
-      "clickThrough": false
+      "clickThrough": false,
+      "attachToScreenEdge": false,
+      "island": false
     }
   ],
+  "desktopClockCustomColor": {
+    "r": 1,
+    "g": 1,
+    "b": 1,
+    "a": 1,
+    "hsvHue": -1,
+    "hsvSaturation": 0,
+    "hsvValue": 1,
+    "hslHue": -1,
+    "hslSaturation": 0,
+    "hslLightness": 1,
+    "valid": true
+  },
+  "systemMonitorCustomColor": {
+    "r": 1,
+    "g": 1,
+    "b": 1,
+    "a": 1,
+    "hsvHue": -1,
+    "hsvSaturation": 0,
+    "hsvValue": 1,
+    "hslHue": -1,
+    "hslSaturation": 0,
+    "hslLightness": 1,
+    "valid": true
+  },
   "builtInPluginSettings": {
     "dms_settings_search": {
       "trigger": "?"
+    },
+    "dms_clipboard_search": {
+      "trigger": "cb"
+    },
+    "dms_power": {
+      "trigger": "pw"
+    },
+    "dms_qr_generator": {
+      "trigger": "qrg"
     }
   },
-  "configVersion": 18,
-  "closeNiriOverviewOnWindowFocus": true,
-  "clockFormat": "24h"
+  "configVersion": 18
 }
