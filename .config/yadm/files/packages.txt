@@ -15,7 +15,6 @@ cava
 cups
 dex
 discord
-dms-shell-niri
 dnsmasq
 dotnet-sdk
 dotnet-sdk-6.0
@@ -46,6 +45,7 @@ mpv
 neovim
 nfs-utils
 niri
+noctalia
 noto-fonts-emoji
 pam-gnupg
 pavucontrol
