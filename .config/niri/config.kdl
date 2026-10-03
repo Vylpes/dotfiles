@@ -41,11 +41,16 @@ binds {
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
     // Applications
+    Mod+A { spawn-sh "noctalia msg panel-toggle control-center"; }
     Mod+B { spawn "firefox"; }
+    Mod+N { spawn-sh "noctalia msg panel-toggle control-center notifications"; }
     Mod+P { spawn "pcmanfm"; }
     Mod+T { spawn "alacritty"; }
+    Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
 
     Mod+Shift+B { spawn "firefox" "--private-window"; }
+    Mod+Shift+N { spawn-sh "noctalia msg notification-clear-history"; }
+    Mod+Shift+V { spawn-sh "noctalia msg clipboard-clear"; }
 
     // Window Actions
     Mod+C { center-column; }
