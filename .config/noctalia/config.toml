@@ -1,5 +1,5 @@
 [bar.default]
-center = [ "control-center", "clock" ]
+center = [ "control-center", "date", "clock" ]
 end = [ "tray", "notifications", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "session" ]
 margin_edge = 5
 margin_ends = 5
