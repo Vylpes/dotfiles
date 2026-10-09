@@ -117,3 +117,7 @@ input {
         natural-scroll
     }
 }
+
+layout {
+    always-center-single-column
+}
